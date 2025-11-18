@@ -8,8 +8,6 @@ import {
   Circle,
   Edit2,
   RotateCcw,
-  Sun,
-  Moon,
   ChevronDown
 } from 'lucide-react';
 import './App.css';
@@ -147,7 +145,14 @@ export default function App() {
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-500 dark:text-blue-300">
                   Weekly Planner
                 </p>
-                <h1 className="mt-2 text-3xl font-semibold text-slate-900 dark:text-white">Tweet Board</h1>
+                <div className="mt-2 flex items-center gap-3">
+                  <img 
+                    src="/icons/dashboard.png" 
+                    alt="Dashboard icon" 
+                    className="h-8 w-8"
+                  />
+                  <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">Tweet Board</h1>
+                </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   Keep your content calendar tidy and ready to ship.
                 </p>
