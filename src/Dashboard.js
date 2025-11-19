@@ -285,7 +285,7 @@ export default function Dashboard() {
             return (
               <div
                 key={day}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-md shadow-black/5 dark:border-slate-800 dark:bg-slate-900"
+                className="flex max-h-[600px] flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-md shadow-black/5 dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex items-center justify-between border-b border-slate-200 pb-3 dark:border-slate-800">
                   <div>
@@ -303,7 +303,7 @@ export default function Dashboard() {
                   </span>
                 </div>
 
-                <div className="mt-4 space-y-3">
+                <div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
                   {dayTweets.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-400 dark:border-slate-700 dark:text-slate-500">
                       Nothing scheduled
