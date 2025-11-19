@@ -22,7 +22,9 @@ export default function Dashboard() {
   const [editContent, setEditContent] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
   const [isDayMenuOpen, setIsDayMenuOpen] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
   const dayMenuRef = useRef(null);
+  const warningTimeoutRef = useRef(null);
 
   const daysOfWeek = [
     'Monday',
@@ -49,6 +51,14 @@ export default function Dashboard() {
     localStorage.setItem('weeklyTweets', JSON.stringify(tweets));
   }, [tweets]);
 
+  useEffect(() => {
+    return () => {
+      if (warningTimeoutRef.current) {
+        clearTimeout(warningTimeoutRef.current);
+      }
+    };
+  }, []);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -73,15 +83,45 @@ export default function Dashboard() {
         content: newTweet,
         day: selectedDay,
         createdAt: new Date().toISOString(),
-        tweeted: false
+        tweeted: false,
+        deleted: false
       };
       setTweets(prev => [...prev, tweet]);
       setNewTweet('');
     }
   };
 
+  const showWarning = (message) => {
+    setWarningMessage(message);
+    if (warningTimeoutRef.current) {
+      clearTimeout(warningTimeoutRef.current);
+    }
+    warningTimeoutRef.current = setTimeout(() => {
+      setWarningMessage('');
+      warningTimeoutRef.current = null;
+    }, 3000);
+  };
+
   const deleteTweet = (id) => {
-    setTweets(tweets.filter(tweet => tweet.id !== id));
+    let attemptedTweetedDelete = false;
+    setTweets(prevTweets => {
+      const target = prevTweets.find(tweet => tweet.id === id);
+      if (!target) return prevTweets;
+      if (target.tweeted) {
+        attemptedTweetedDelete = true;
+        return prevTweets;
+      }
+      if (target.deleted) {
+        return prevTweets;
+      }
+      return prevTweets.map(tweet =>
+        tweet.id === id ? { ...tweet, deleted: true } : tweet
+      );
+    });
+
+    if (attemptedTweetedDelete) {
+      showWarning('You cannot delete a tweet that has already been posted.');
+    }
   };
 
   const toggleTweeted = (id) => {
@@ -125,7 +165,7 @@ export default function Dashboard() {
     setShowResetModal(false);
   };
 
-  const getTweetsForDay = (day) => tweets.filter(tweet => tweet.day === day);
+  const getTweetsForDay = (day) => tweets.filter(tweet => tweet.day === day && !tweet.deleted);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -134,14 +174,22 @@ export default function Dashboard() {
     }
   };
 
-  const tweetedCount = tweets.filter(t => t.tweeted).length;
   const totalCount = tweets.length;
+  const deletedCount = tweets.filter(t => t.deleted).length;
+  const tweetedCount = tweets.filter(t => t.tweeted && !t.deleted).length;
+  const pendingCount = Math.max(totalCount - tweetedCount - deletedCount, 0);
+  const getPercentage = (count) => (totalCount === 0 ? 0 : (count / totalCount) * 100);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-100 text-slate-900 transition-colors dark:bg-slate-950 dark:text-slate-100">
       <div className="flex-1 px-4 py-8 sm:px-6 lg:px-10">
         <div className="mx-auto w-full max-w-7xl">
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-black/5 dark:border-slate-800 dark:bg-slate-900">
+            {warningMessage && (
+              <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">
+                {warningMessage}
+              </div>
+            )}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-500 dark:text-blue-300">
@@ -363,19 +411,49 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-black/5 dark:border-slate-800 dark:bg-slate-900">
-          <div className="grid gap-6 sm:grid-cols-3">
-            <div className="text-center">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
               <p className="text-xs uppercase tracking-wide text-slate-500">Total Tweets</p>
               <p className="mt-2 text-4xl font-semibold text-slate-900 dark:text-white">{totalCount}</p>
             </div>
-            <div className="text-center">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Tweeted</p>
-              <p className="mt-2 text-4xl font-semibold text-emerald-600 dark:text-emerald-300">{tweetedCount}</p>
+            <div className="flex flex-wrap gap-4 text-sm font-semibold">
+              <span className="flex items-center gap-2 text-amber-600 dark:text-amber-300">
+                <span className="h-3 w-3 rounded-full bg-amber-400" />
+                Pending {pendingCount}
+              </span>
+              <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-300">
+                <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                Tweeted {tweetedCount}
+              </span>
+              <span className="flex items-center gap-2 text-rose-600 dark:text-rose-300">
+                <span className="h-3 w-3 rounded-full bg-rose-400" />
+                Deleted {deletedCount}
+              </span>
             </div>
-            <div className="text-center">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Pending</p>
-              <p className="mt-2 text-4xl font-semibold text-amber-600 dark:text-amber-300">{totalCount - tweetedCount}</p>
+          </div>
+          <div className="mt-6 space-y-2">
+            <div className="h-4 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <div className="flex h-full w-full">
+                <div
+                  className="h-full bg-amber-400 transition-all duration-300"
+                  style={{ width: `${getPercentage(pendingCount)}%` }}
+                  title={`Pending: ${pendingCount}`}
+                />
+                <div
+                  className="h-full bg-emerald-400 transition-all duration-300"
+                  style={{ width: `${getPercentage(tweetedCount)}%` }}
+                  title={`Tweeted: ${tweetedCount}`}
+                />
+                <div
+                  className="h-full bg-rose-400 transition-all duration-300"
+                  style={{ width: `${getPercentage(deletedCount)}%` }}
+                  title={`Deleted: ${deletedCount}`}
+                />
+              </div>
             </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Progress shows the share of pending, tweeted, and deleted ideas out of the total.
+            </p>
           </div>
         </div>
         </div>
