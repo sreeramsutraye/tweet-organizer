@@ -7,27 +7,31 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <div className="text-center sm:text-left">
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              © {new Date().getFullYear()} Tweet Organizer. All rights reserved.
+              © {new Date().getFullYear()} Tweet Organizer. Made by @Ram Sutraye.
             </p>
           </div>
-          <div className="flex gap-6">
+          <div className="flex items-center gap-6">
             <a
-              href="#"
-              className="text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+              href="mailto:sreeramsutraye@gmail.com"
+              className="flex items-center gap-2 text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
             >
-              About
+              Email me
             </a>
             <a
-              href="#"
-              className="text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+              href="https://x.com/ram_sutraye"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
             >
-              Privacy
+              X account
             </a>
             <a
-              href="#"
-              className="text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
+              href="https://github.com/sreeramsutraye/tweet-organizer"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-slate-600 transition hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
             >
-              Terms
+              Github
             </a>
           </div>
         </div>
